@@ -12,12 +12,16 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build Pulse
         shell: cmd
-        run: build_release.bat
+        run: |
+          call scripts\vcvars.bat
+          set /p PULSE_UPDATE_KEY=<cmake\update-public-key.txt
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DPULSE_WITH_SELFTEST=OFF -DLUMATEXT_SOURCE_DIR= -DPULSE_WITH_LUMATEXT=ON -DPULSE_UPDATE_PUBLIC_KEY_HEX=%PULSE_UPDATE_KEY%
+          cmake --build build --target pulse
       - name: Upload custom pulse binary
         uses: actions/upload-artifact@v4
         with:
           name: Pulse-Custom-400w
           path: |
             build/pulse.exe
-            build/lumatext.dll
-            build/pdfium.dll
+            build/*.dll
+            build/*.exe
