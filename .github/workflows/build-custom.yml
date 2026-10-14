@@ -1,0 +1,23 @@
+name: Build Custom Pulse
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build, test and package
+        shell: pwsh
+        run: ./scripts/build_release_ci.ps1 -Channel windows
+      - name: Upload custom pulse build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Pulse-Custom-400w
+          path: |
+            dist/Pulse-*-portable-win-x64.zip
+            dist/PulseSetup-*.exe
+            build-ci/pulse.exe
