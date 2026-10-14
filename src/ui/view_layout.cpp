@@ -96,7 +96,7 @@ ViewLayout::ViewLayout(ViewMode mode, D2D1_RECT_F viewport, size_t item_count,
     case ViewMode::SmallIcons: grid(144.0f, 28.0f, 16.0f); break;
     case ViewMode::Tiles: grid(280.0f, 72.0f, 48.0f); break;
     case ViewMode::List: {
-        metrics_.cell_width = 220.0f * scale_;
+        metrics_.cell_width = 400.0f * scale_;
         metrics_.cell_height = 24.0f * scale_;
         metrics_.icon_size = 16.0f * scale_;
         metrics_.column_major = true;
