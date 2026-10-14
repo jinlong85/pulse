@@ -7,17 +7,17 @@ on:
 jobs:
   build:
     runs-on: windows-2022
-    timeout-minutes: 60
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Build, test and package
-        shell: pwsh
-        run: ./scripts/build_release_ci.ps1 -Channel windows
-      - name: Upload custom pulse build
+      - name: Build Pulse
+        shell: cmd
+        run: build_release.bat
+      - name: Upload custom pulse binary
         uses: actions/upload-artifact@v4
         with:
           name: Pulse-Custom-400w
           path: |
-            dist/Pulse-*-portable-win-x64.zip
-            dist/PulseSetup-*.exe
-            build-ci/pulse.exe
+            build/pulse.exe
+            build/lumatext.dll
+            build/pdfium.dll
