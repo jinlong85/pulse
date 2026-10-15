@@ -32,5 +32,5 @@ if defined LUMATEXT_SOURCE_DIR (
     cmake %PULSE_CMAKE_FRESH% -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=%PULSE_BUILD_TYPE% %PULSE_UPDATE_CONFIG%
 )
 if errorlevel 1 exit /b 1
-cmake --build build %PULSE_CMAKE_CLEAN%
+cmake --build build --target pulse %PULSE_CMAKE_CLEAN%
 if errorlevel 1 exit /b 1
