@@ -722,13 +722,33 @@ HRESULT QueryOneHandler(const CtxHandlerDesc& handler, const CtxBind& bind,
         if (items) items->Release();
         command->Release();
     } else {
-        IUnknown* unk = nullptr;
+        // Standard Windows Shell protocol: context menu handlers are expected to be
+        // instantiated via IShellExtInit directly. Certain legacy extensions (such as
+        // Link Shell Extension) do not implement IUnknown::QueryInterface symmetrically
+        // and fail if created via bare IUnknown.
+        IShellExtInit* init = nullptr;
         hr = CoCreateInstance(handler.clsid, nullptr, CLSCTX_INPROC_SERVER,
-                              IID_IUnknown, reinterpret_cast<void**>(&unk));
-        if (FAILED(hr) || !unk) return FAILED(hr) ? hr : E_FAIL;
-
-        hr = InitContextMenuExtension(unk, bind, &slot.menu);
-        unk->Release();
+                              IID_PPV_ARGS(&init));
+        if (SUCCEEDED(hr) && init) {
+            const HRESULT init_hr = init->Initialize(bind.folder, bind.data, bind.assoc);
+            if (FAILED(init_hr)) {
+                init->Release();
+                return init_hr;
+            }
+            hr = init->QueryInterface(IID_PPV_ARGS(&slot.menu));
+            init->Release();
+        } else {
+            IUnknown* unk = nullptr;
+            hr = CoCreateInstance(handler.clsid, nullptr, CLSCTX_INPROC_SERVER,
+                                  IID_IUnknown, reinterpret_cast<void**>(&unk));
+            if (SUCCEEDED(hr) && unk) {
+                hr = InitContextMenuExtension(unk, bind, &slot.menu);
+                unk->Release();
+            } else {
+                hr = CoCreateInstance(handler.clsid, nullptr, CLSCTX_INPROC_SERVER,
+                                      IID_PPV_ARGS(&slot.menu));
+            }
+        }
     }
     if (FAILED(hr) || !slot.menu) {
         slot.menu = nullptr;
